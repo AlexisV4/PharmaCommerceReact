@@ -16,10 +16,12 @@ function App() {
           <Route path="/productos" element={<Productos />} /> {/* Ruta para Productos */}
           {/* Agrega más rutas si es necesario */}
         </Routes>
+        
         <Footer />
       </div>
     </Router>
   );
-}
+};
+
 
 export default App;

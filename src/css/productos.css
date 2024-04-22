@@ -155,7 +155,27 @@ footer {
     color: rgb(0, 162, 255);
 }
 
-
-
+.ventana-emergente {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border: 1px solid black;
+    padding: 20px;
+    z-index: 9999;
+  }
+  
+  .contenido-ventana {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .cerrar-ventana {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+  }
 
 

@@ -1,8 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from 'axios';
 import '../css/estilos.css';
 import '../css/productos.css'
+import '../js/bootstrap.bundle.min.js'
 
 const CrudProductos = () => {
+    const [productos, setProductos] = useState([]);
+    const [terminoBusqueda, setTerminoBusqueda] = useState("");
+    const [mostrarResultados, setMostrarResultados] = useState(false);
+  
+    const buscarProductos = async () => {
+      try {
+        console.log("Enviando solicitud de búsqueda:", terminoBusqueda);
+        const response = await axios.get(
+          `http://localhost:5000/api/productos?termino=${terminoBusqueda}`
+        );
+        console.log("Respuesta del servidor:", response.data);
+        setProductos(response.data);
+      } catch (error) {
+        console.error("Error al buscar productos:", error);
+      }
+    };
+  
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        await buscarProductos();
+        setMostrarResultados(true);
+    };
+  
+    const handleChange = (event) => {
+      setTerminoBusqueda(event.target.value);
+    };
 
     const crearNuevoProducto = () => {
         // Esta función muestra la ventana emergente al cambiar el estilo de display a 'block'
@@ -50,10 +78,7 @@ const CrudProductos = () => {
         <>
             <div className="container text-center botones-contenedor">
                 <div className="btn-group-vertical botones" role="group" aria-label="Vertical radio toggle button group" style={{ width: '60%' }}>
-                    <button className="btn btn-outline-primary" onClick={crearNuevoProducto}>Crear</button>
                     <button className="btn btn-outline-primary" onClick={buscarUnProducto}>Buscar</button>
-                    <button className="btn btn-outline-primary" onClick={actualizarUnProducto}>Actualizar</button>
-                    <button className="btn btn-outline-primary" onClick={eliminarUnProducto}>Eliminar</button>
                 </div>
 
                 <div id="crearProducto" className="crearProducto" style={{ display: 'none' }}>
@@ -79,7 +104,7 @@ const CrudProductos = () => {
                         <div className="form-group">
                             <label htmlFor="id_proveedor">ID Proveedor:</label>
                             <select className="form-select" aria-label="Default select example" id="id_proveedor" name="id_proveedor">
-                                <option selected disabled>Seleccione un proveedor</option>
+                                <option disabled>Seleccione un proveedor</option>
                                 <option value="900029140" title="Healthy S.A.S">900029140</option>
                                 <option value="900255182" title="Meditech">900255182</option>
                                 <option value="3" title="TechnoHealth">3</option>
@@ -96,7 +121,7 @@ const CrudProductos = () => {
                         <div className="form-group">
                             <label htmlFor="id_categoria">ID Categoría:</label>
                             <select className="form-select" aria-label="Default select example" id="id_categoria" name="id_categoria">
-                                <option selected disabled>Seleccione la categoría</option>
+                                <option disabled>Seleccione la categoría</option>
                                 <option value="101" title="Tratamiento de la gripe">101</option>
                             </select>
                         </div>
@@ -110,16 +135,45 @@ const CrudProductos = () => {
             <div id="buscarProducto" className="buscarProducto" style={{ display: 'none' }}>
                 <button className="cerrar-formulario" onClick={() => cerrarFormulario('buscarProducto')}>×</button>
                 <h2>Buscar Producto</h2>
-                <form action="consultar_producto.php" method="post" onSubmit={(e) => e.preventDefault()}>
+                <form onSubmit={handleSubmit} method="get">
                     <div className="form-group">
                         <label htmlFor="termino_busqueda">Buscar:</label>
-                        <input type="text" id="termino_busqueda" name="termino_busqueda" placeholder="Término de búsqueda" />
+                        <input type="text" id="termino_busqueda" name="termino_busqueda" placeholder="Término de búsqueda" value={terminoBusqueda} onChange={handleChange}/>
                     </div>
                     <div style={{ textAlign: 'center' }}>
                         <button type="submit" name="consultar_producto" className="btn btn-primary" style={{ margin: 'auto', width: '150px', boxShadow: '2px 2px 10px rgba(0, 0, 0, 0.5)' }}>Buscar</button>
                     </div>
                 </form>
             </div>
+            
+            {mostrarResultados && (
+                <div className="ventana-emergente">
+                    <button className="cerrar-ventana" onClick={() => setMostrarResultados(false)}>×</button>
+                    <div className="contenido-ventana">
+                    {productos.length > 0 ? (
+                        <div>
+                        <h2>Resultados de la búsqueda:</h2>
+                        <ul>
+                            {productos.map((producto) => (
+                            <li key={producto.id_producto}>
+                                <p>ID: {producto.id_producto}</p>
+                                <p>Nombre: {producto.nombre}</p>
+                                <p>Descripción: {producto.descripcion}</p>
+                                <p>Precio: {producto.precio_venta}</p>
+                                <p>ID Proveedor: {producto.id_proveedor}</p>
+                                <p>Stock: {producto.stock}</p>
+                                <p>Vencimiento: {producto.fecha_vencimiento}</p>
+                                <p>ID Categoría: {producto.id_categoria}</p>
+                            </li>
+                            ))}
+                        </ul>
+                        </div>
+                    ) : (
+                        <p>No se encontraron productos.</p>
+                    )}
+                    </div>
+                </div>
+            )}
 
             <div id="actualizarProducto" className="actualizarProducto" style={{ display: 'none' }}>
                 <button className="cerrar-formulario" onClick={() => cerrarFormulario('actualizarProducto')}>×</button>
@@ -132,7 +186,7 @@ const CrudProductos = () => {
                     <div className="form-group">
                         <label htmlFor="campo_actualizar">Campo a actualizar:</label>
                         <select className="form-select" aria-label="Default select example" id="campo_actualizar" name="campo_actualizar">
-                            <option selected disabled>Seleccione un campo</option>
+                            <option disabled>Seleccione un campo</option>
                             <option value="id_producto">id_producto</option>
                             <option value="nombre">nombre</option>
                             <option value="descripcion">descripcion</option>
@@ -160,7 +214,7 @@ const CrudProductos = () => {
                     <div className="form-group">
                         <label htmlFor="producto_id">ID Producto a eliminar:</label>
                         <select className="form-select" aria-label="Seleccione un producto" id="producto_id" name="producto_id">
-                            <option value="" selected>Seleccione un producto</option>
+                            <option value="" disabled>Seleccione un producto</option>
                             <option value="909189243129" title="Loratadina x10 Capsulas">909189243129</option>
                         </select>
                     </div>
